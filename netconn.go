@@ -22,6 +22,7 @@ package mqtt
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -48,18 +49,26 @@ func openConnection(uri *url.URL, tlsc *tls.Config, timeout time.Duration, heade
 	case "mqtt", "tcp":
 		allProxy := os.Getenv("all_proxy")
 		if len(allProxy) == 0 {
+			fmt.Println("NO PROXY! dialing")
 			conn, err := dialer.Dial("tcp", uri.Host)
+			fmt.Println("NO PROXY! donedial")
 			if err != nil {
+				fmt.Println("NO PROXY! err", err)
 				return nil, err
 			}
+			fmt.Println("NO PROXY! happy conn")
 			return conn, nil
 		}
 		proxyDialer := proxy.FromEnvironment()
 
+		fmt.Println("YES PROXY! dialing", proxyDialer)
 		conn, err := proxyDialer.Dial("tcp", uri.Host)
+		fmt.Println("YES PROXY! donedial")
 		if err != nil {
+			fmt.Println("YES PROXY! err", err)
 			return nil, err
 		}
+		fmt.Println("YES PROXY! happy conn", conn)
 		return conn, nil
 	case "unix":
 		var conn net.Conn
